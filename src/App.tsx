@@ -242,19 +242,7 @@ const SearchApp: React.FC = () => {
             <ul className="divide-y divide-gray-200">
               {results.map((result: SearchResult, index: number) => (
                 <li key={index} className="py-5 transition-colors hover:bg-gray-50 rounded-lg px-3">
-                  <div className="flex justify-between">
-                    <div className="flex-grow">
-                      <div className="font-medium text-lg text-gray-800">{result.title || result.name || `Result ${index + 1}`}</div>
-                      {result.description && <p className="mt-1 text-gray-600">{result.description}</p>}
-                    </div>
-                    {result.score !== undefined && (
-                      <div className="ml-4 self-start">
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                          {result.score.toFixed(3)}
-                        </span>
-                      </div>
-                    )}
-                  </div>
+                  {result.text}
                 </li>
               ))}
             </ul>
