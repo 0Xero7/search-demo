@@ -37,7 +37,7 @@ const SearchApp: React.FC = () => {
       const startTime: number = performance.now();
       
       try {
-        const url: string = `http://54.167.27.251:8080/search?search=${encodeURIComponent(search)}&optimized=${fast}&limit=${limit}&threshold=${threshold}`;
+        const url: string = `https://po65lcryad.execute-api.us-east-1.amazonaws.com/dev/search?search=${encodeURIComponent(search)}&optimized=${fast}&limit=${limit}&threshold=${threshold}`;
         
         const response: Response = await fetch(url);
         if (!response.ok) {
