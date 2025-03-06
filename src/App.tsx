@@ -11,6 +11,12 @@ interface SearchResult {
   [key: string]: any; // For any additional properties in results
 }
 
+interface TimingMetrics {
+  embeddings: number;
+  search: number;
+  total: number;
+}
+
 const SearchApp: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [threshold, setThreshold] = useState<number>(0.5);
@@ -19,35 +25,47 @@ const SearchApp: React.FC = () => {
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [requestTime, setRequestTime] = useState<number | null>(null);
+  const [timingMetrics, setTimingMetrics] = useState<TimingMetrics | null>(null);
 
   // Create a debounced search function
   const debouncedSearch = useCallback(
     _.debounce(async (search: string, threshold: number, fast: boolean, limit: number): Promise<void> => {
       if (!search) {
         setResults([]);
-        setRequestTime(null);
+        setTimingMetrics(null);
         return;
       }
 
       setLoading(true);
       setError(null);
-      setRequestTime(null);
+      setTimingMetrics(null);
       
       const startTime: number = performance.now();
       
       try {
-        const url: string = `https://po65lcryad.execute-api.us-east-1.amazonaws.com/dev/search?search=${encodeURIComponent(search)}&optimized=${fast}&limit=${limit}&threshold=${threshold}`;
+        const url: string = `http://54.167.27.251:8080/search?search=${encodeURIComponent(search)}&optimized=${fast}&limit=${limit}&threshold=${threshold}`;
         
         const response: Response = await fetch(url);
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
         
-        const data: SearchResult[] = await response.json();
+        const data: any = await response.json();
         const endTime: number = performance.now();
-        setRequestTime(endTime - startTime);
-        setResults(data);
+        const totalTime = endTime - startTime;
+        
+        // For demo purposes, we'll simulate the metrics
+        // In a real implementation, these would come from the API
+        // Assuming the API doesn't return timing metrics yet
+        const embeddingsTime = data['embedding_time']; // 30% of total time
+        const searchTime = data['search_time']; // 60% of total time
+        
+        setTimingMetrics({
+          embeddings: embeddingsTime / 1_000_000,
+          search: searchTime / 1_000_000,
+          total: totalTime
+        });
+        setResults(data['results']);
       } catch (err) {
         console.error('Error fetching search results:', err);
         setError('Failed to fetch results. Please try again.');
@@ -168,11 +186,26 @@ const SearchApp: React.FC = () => {
         {/* Results Panel */}
         <div className="bg-white rounded-xl shadow-lg p-6">
           {/* Header */}
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-semibold text-gray-800">Search Results</h2>
-            {requestTime !== null && !loading && (
-              <div className="text-sm px-3 py-1 bg-blue-50 text-blue-700 rounded-full font-medium">
-                Request time: {requestTime.toFixed(2)} ms
+          <div className="mb-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-semibold text-gray-800">Search Results</h2>
+            </div>
+            
+            {/* Timing Metrics */}
+            {timingMetrics !== null && !loading && (
+              <div className="mt-2 grid grid-cols-3 gap-2">
+                <div className="text-sm px-3 py-2 bg-green-50 text-green-700 rounded-lg font-medium flex flex-col items-center">
+                  <span className="text-xs text-green-600 mb-1">Embeddings</span>
+                  <span className="font-bold">{timingMetrics.embeddings.toFixed(2)} ms</span>
+                </div>
+                <div className="text-sm px-3 py-2 bg-blue-50 text-blue-700 rounded-lg font-medium flex flex-col items-center">
+                  <span className="text-xs text-blue-600 mb-1">Search</span>
+                  <span className="font-bold">{timingMetrics.search.toFixed(2)} ms</span>
+                </div>
+                <div className="text-sm px-3 py-2 bg-purple-50 text-purple-700 rounded-lg font-medium flex flex-col items-center">
+                  <span className="text-xs text-purple-600 mb-1">Total</span>
+                  <span className="font-bold">{timingMetrics.total.toFixed(2)} ms</span>
+                </div>
               </div>
             )}
           </div>
@@ -208,7 +241,19 @@ const SearchApp: React.FC = () => {
             <ul className="divide-y divide-gray-200">
               {results.map((result: SearchResult, index: number) => (
                 <li key={index} className="py-5 transition-colors hover:bg-gray-50 rounded-lg px-3">
-                  {result.text}
+                  <div className="flex justify-between">
+                    <div className="flex-grow">
+                      <div className="font-medium text-lg text-gray-800">{result.title || result.name || `Result ${index + 1}`}</div>
+                      {result.description && <p className="mt-1 text-gray-600">{result.description}</p>}
+                    </div>
+                    {result.score !== undefined && (
+                      <div className="ml-4 self-start">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                          {result.score.toFixed(3)}
+                        </span>
+                      </div>
+                    )}
+                  </div>
                 </li>
               ))}
             </ul>
