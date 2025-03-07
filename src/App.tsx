@@ -78,7 +78,7 @@ const SearchApp: React.FC = () => {
             return (
               {
                 name: jsonData['name'],
-                location: jsonData['location'],
+                location: jsonData['location'].toString(),
                 summary: jsonData['summary'],
                 text: jsonData['text'],
                 score: jsonData['score']
