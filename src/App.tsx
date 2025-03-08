@@ -25,6 +25,7 @@ const SearchApp: React.FC = () => {
   const [limit, setLimit] = useState<number>(10);
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const [datasetCount, setDatasetCount] = useState<number>(0);
   const [error, setError] = useState<string | null>(null);
   const [timingMetrics, setTimingMetrics] = useState<TimingMetrics | null>(null);
   const [speed, setSpeed] = useState<number>(0);
@@ -62,8 +63,10 @@ const SearchApp: React.FC = () => {
         // For demo purposes, we'll simulate the metrics
         // In a real implementation, these would come from the API
         // Assuming the API doesn't return timing metrics yet
-        const embeddingsTime = data['embedding_time']; // 30% of total time
-        const searchTime = data['search_time']; // 60% of total time
+        const embeddingsTime = data['embedding_time'];
+        const searchTime = data['search_time'];
+        const count = parseInt(data['collection_size']);
+        setDatasetCount(count);
 
         setTimingMetrics({
           embeddings: embeddingsTime / 1_000_000,
@@ -361,6 +364,9 @@ const SearchApp: React.FC = () => {
           <div className="mb-6">
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold text-gray-800">Search Results</h2>
+              <div className='text-sm text-gray-500'>
+                {datasetCount} points
+              </div>
             </div>
 
             {/* Timing Metrics */}
