@@ -278,7 +278,7 @@ const SearchApp: React.FC = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               {/* Speed selection */}
-              <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-5 rounded-lg shadow-sm border border-gray-200">
+              <div className={"bg-gradient-to-br from-gray-50 to-gray-100 p-5 rounded-lg shadow-sm border border-gray-200 " + (!fast ? "pointer-events-none opacity-50" : "")}>
                 <label className="block text-sm font-medium text-gray-700 mb-3">
                   Processing Speed
                 </label>
